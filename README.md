@@ -22,15 +22,16 @@ Effciency has not been optimized. It may be faster... I don't know
 | YOLO VGG-16  |   VGG-16        | 66.4%      |  21   |
 
 ### 1. Dependency
-- pytorch 0.2.0_2
-- opencv
-- visdom
-- tqdm
+- pytorch 0.4.0
+- torchvision 0.2.0
+- opencv (latest)
+- visdom (X)
+- tqdm (X)
 
 ### 2. Prepare
 
 1. Download voc2012train dataset
-2. Download voc2007test dataset
+2. Download voc2007train & test dataset
 3. put all images in one folder, i have provide txt annotation file 
 ~~3. Convert xml annotations to txt file, for the purpose of using dataset.py, you should put the xml_2_txt.py in the same folder of voc dataset, or change *Annotations* path in xml_2_txt.py~~ 
 

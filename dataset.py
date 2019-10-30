@@ -67,7 +67,6 @@ class yoloDataset(data.Dataset):
 
         if self.train:
             #img = self.random_bright(img)
-            img, boxes = self.random_flip(img, boxes)
             img,boxes = self.randomScale(img,boxes)
             img = self.randomBlur(img)
             img = self.RandomBrightness(img)
@@ -271,7 +270,7 @@ class yoloDataset(data.Dataset):
 def main():
     from torch.utils.data import DataLoader
     import torchvision.transforms as transforms
-    file_root = '/home/xzh/data/VOCdevkit/VOC2012/allimgs/'
+    file_root = '/home/xzh/data/VOCdevkit/VOC2012/JPEGImages/'
     train_dataset = yoloDataset(root=file_root,list_file='voc12_trainval.txt',train=True,transform = [transforms.ToTensor()] )
     train_loader = DataLoader(train_dataset,batch_size=1,shuffle=False,num_workers=0)
     train_iter = iter(train_loader)

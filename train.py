@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -12,12 +12,11 @@ from resnet_yolo import resnet50, resnet18
 from yoloLoss import yoloLoss
 from dataset import yoloDataset
 
-from visualize import Visualizer
 import numpy as np
 
 use_gpu = torch.cuda.is_available()
 
-file_root = '/home/xzh/data/VOCdevkit/VOC2012/allimgs/'
+file_root = '/home/yangho/dev/dataset/VOCdevkit/VOC2012/JPEGImages/'
 learning_rate = 0.001
 num_epochs = 50
 batch_size = 24
@@ -26,22 +25,6 @@ if use_resnet:
     net = resnet50()
 else:
     net = vgg16_bn()
-# net.classifier = nn.Sequential(
-#             nn.Linear(512 * 7 * 7, 4096),
-#             nn.ReLU(True),
-#             nn.Dropout(),
-#             #nn.Linear(4096, 4096),
-#             #nn.ReLU(True),
-#             #nn.Dropout(),
-#             nn.Linear(4096, 1470),
-#         )
-#net = resnet18(pretrained=True)
-#net.fc = nn.Linear(512,1470)
-# initial Linear
-# for m in net.modules():
-#     if isinstance(m, nn.Linear):
-#         m.weight.data.normal_(0, 0.01)
-#         m.bias.data.zero_()
 print(net)
 #net.load_state_dict(torch.load('yolo.pth'))
 print('load pre-trined model')
@@ -82,7 +65,7 @@ for key,value in params_dict.items():
         params += [{'params':[value],'lr':learning_rate*1}]
     else:
         params += [{'params':[value],'lr':learning_rate}]
-optimizer = torch.optim.SGD(params, lr=learning_rate, momentum=0.9, weight_decay=5e-4)
+optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9, weight_decay=5e-4)
 # optimizer = torch.optim.Adam(net.parameters(),lr=learning_rate,weight_decay=1e-4)
 
 # train_dataset = yoloDataset(root=file_root,list_file=['voc12_trainval.txt','voc07_trainval.txt'],train=True,transform = [transforms.ToTensor()] )
@@ -96,7 +79,7 @@ print('the batch_size is %d' % (batch_size))
 logfile = open('log.txt', 'w')
 
 num_iter = 0
-vis = Visualizer(env='xiong')
+# vis = Visualizer(env='xiong')
 best_test_loss = np.inf
 
 for epoch in range(num_epochs):
@@ -128,16 +111,16 @@ for epoch in range(num_epochs):
         
         pred = net(images)
         loss = criterion(pred,target)
-        total_loss += loss.data[0]
+        total_loss += loss.item()
         
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         if (i+1) % 5 == 0:
             print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f, average_loss: %.4f' 
-            %(epoch+1, num_epochs, i+1, len(train_loader), loss.data[0], total_loss / (i+1)))
+            %(epoch+1, num_epochs, i+1, len(train_loader), loss.item(), total_loss / (i+1)))
             num_iter += 1
-            vis.plot_train_val(loss_train=total_loss/(i+1))
+#             vis.plot_train_val(loss_train=total_loss/(i+1))
 
     #validation
     validation_loss = 0.0
@@ -152,7 +135,7 @@ for epoch in range(num_epochs):
         loss = criterion(pred,target)
         validation_loss += loss.data[0]
     validation_loss /= len(test_loader)
-    vis.plot_train_val(loss_val=validation_loss)
+#     vis.plot_train_val(loss_val=validation_loss)
     
     if best_test_loss > validation_loss:
         best_test_loss = validation_loss
